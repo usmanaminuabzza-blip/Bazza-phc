@@ -907,4 +907,307 @@ function App() {
                 <div className="card">
                   <div className="stat-icon">⛔</div>
                   <div className="stat-title">Disabled</div>
-       
+                  <div className="stat-value">
+                    {staff.filter((s) => s.status === "Disabled").length}
+                  </div>
+                </div>
+
+                <div className="card">
+                  <div className="stat-icon">🔐</div>
+                  <div className="stat-title">Permission Types</div>
+                  <div className="stat-value">
+                    {permissionList.length}
+                  </div>
+                </div>
+              </div>
+
+              <div className="table-card">
+                <div className="table-top">
+                  <input
+                    className="search"
+                    placeholder="Search staff name, Staff ID, department or role..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Staff</th>
+                        <th>Staff ID</th>
+                        <th>Username</th>
+                        <th>Department</th>
+                        <th>Role</th>
+                        <th>Permissions</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {filteredStaff.map((person) => (
+                        <tr key={person.id}>
+                          <td>
+                            <strong>{person.name}</strong>
+                          </td>
+
+                          <td>{person.staffId}</td>
+
+                          <td>{person.username}</td>
+
+                          <td>{person.department}</td>
+
+                          <td>{person.role}</td>
+
+                          <td>
+                            <div className="permission-summary">
+                              {(person.permissions || []).map((permission) => (
+                                <span
+                                  className="permission-tag"
+                                  key={permission}
+                                >
+                                  {permission}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+
+                          <td>
+                            <span
+                              className={
+                                person.status === "Active"
+                                  ? "badge-active"
+                                  : "badge-disabled"
+                              }
+                            >
+                              {person.status}
+                            </span>
+                          </td>
+
+                          <td>
+                            <button
+                              className="action-btn"
+                              onClick={() => openEditStaff(person)}
+                            >
+                              Edit
+                            </button>
+
+                            <button
+                              className="action-btn"
+                              onClick={() => openPermissions(person)}
+                            >
+                              Permissions
+                            </button>
+
+                            <button
+                              className="action-btn"
+                              onClick={() => toggleStatus(person.id)}
+                            >
+                              {person.status === "Active"
+                                ? "Disable"
+                                : "Activate"}
+                            </button>
+
+                            <button
+                              className="action-btn"
+                              onClick={() => resetPassword(person)}
+                            >
+                              Reset Password
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+
+          {active !== "Dashboard" && active !== "Staff & Roles" && (
+            <div className="card">
+              <h2>{active}</h2>
+              <p style={{ color: "#68736d" }}>
+                Wannan module zai kasance mataki na gaba na construction.
+              </p>
+            </div>
+          )}
+        </section>
+      </main>
+
+      {/* CREATE / EDIT STAFF */}
+      {showForm && (
+        <div className="form-overlay">
+          <div className="form-modal">
+            <h2>
+              {editing ? "Edit Staff Account" : "Create New Staff Account"}
+            </h2>
+
+            <form onSubmit={saveStaff}>
+              <div className="form-grid">
+
+                <div className="field full">
+                  <label>Staff Full Name *</label>
+                  <input
+                    value={form.name}
+                    onChange={(e) =>
+                      setForm({ ...form, name: e.target.value })
+                    }
+                    placeholder="Enter staff full name"
+                  />
+                </div>
+
+                <div className="field">
+                  <label>Staff ID *</label>
+                  <input
+                    value={form.staffId}
+                    onChange={(e) =>
+                      setForm({ ...form, staffId: e.target.value })
+                    }
+                    placeholder="e.g. BZ005"
+                  />
+                </div>
+
+                <div className="field">
+                  <label>Username *</label>
+                  <input
+                    value={form.username}
+                    onChange={(e) =>
+                      setForm({ ...form, username: e.target.value })
+                    }
+                    placeholder="Enter username"
+                  />
+                </div>
+
+                {!editing && (
+                  <div className="field full">
+                    <label>Initial Password *</label>
+                    <input
+                      type="password"
+                      value={form.password}
+                      onChange={(e) =>
+                        setForm({ ...form, password: e.target.value })
+                      }
+                      placeholder="Create temporary password"
+                    />
+                  </div>
+                )}
+
+                <div className="field">
+                  <label>Main Department *</label>
+                  <select
+                    value={form.department}
+                    onChange={(e) =>
+                      setForm({ ...form, department: e.target.value })
+                    }
+                  >
+                    <option value="">Select department</option>
+
+                    {departments.map((dept) => (
+                      <option key={dept} value={dept}>
+                        {dept}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="field">
+                  <label>Role *</label>
+                  <select
+                    value={form.role}
+                    onChange={(e) =>
+                      setForm({ ...form, role: e.target.value })
+                    }
+                  >
+                    <option value="">Select role</option>
+
+                    {roles.map((role) => (
+                      <option key={role} value={role}>
+                        {role}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+              </div>
+
+              <div className="security-note">
+                🔐 <strong>Access Control:</strong> Staff will only receive
+                the permissions assigned by Super Admin.
+              </div>
+
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => setShowForm(false)}
+                >
+                  Cancel
+                </button>
+
+                <button type="submit" className="primary">
+                  {editing ? "Save Changes" : "Create Staff"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* PERMISSIONS */}
+      {showPermission && editing && (
+        <div className="form-overlay">
+          <div className="form-modal">
+            <h2>Manage Permissions</h2>
+
+            <p style={{ color: "#68736d" }}>
+              Staff: <strong>{editing.name}</strong>
+            </p>
+
+            <p style={{ color: "#68736d" }}>
+              Department: <strong>{editing.department}</strong>
+            </p>
+
+            <div className="permission-grid">
+              {permissionList.map((permission) => (
+                <label className="permission-item" key={permission}>
+                  <input
+                    type="checkbox"
+                    checked={selectedPermissions.includes(permission)}
+                    onChange={() => togglePermission(permission)}
+                  />
+
+                  <span>{permission}</span>
+                </label>
+              ))}
+            </div>
+
+            <div className="security-note">
+              <strong>Security Rule</strong>
+              <br />
+              Super Admin ne kawai zai iya canza waɗannan permissions.
+              Department staff ba zai iya ba kansa permission ba.
+            </div>
+
+            <div className="form-actions">
+              <button
+                className="secondary"
+                onClick={() => setShowPermission(false)}
+              >
+                Cancel
+              </button>
+
+              <button className="primary" onClick={savePermissions}>
+                Save Permissions
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
