@@ -36,42 +36,67 @@ const roles = [
   "Adolescent Staff",
 ];
 
+const permissionList = [
+  "View",
+  "Create",
+  "Edit",
+  "Delete",
+  "Print",
+  "Cashier",
+  "Reports",
+  "Stock",
+  "SMS",
+  "Alerts",
+];
+
 const initialStaff = [
   {
     id: 1,
     name: "Altini Garba Bazza",
     staffId: "BZ001",
-    department: "Hospital Management",
-    role: "In-Charge",
     username: "altini",
+    department: "In-Charge",
+    role: "In-Charge",
     status: "Active",
+    permissions: ["View", "Print", "Reports", "SMS", "Alerts"],
   },
   {
     id: 2,
     name: "Hadiza Umar",
     staffId: "BZ002",
+    username: "hadiza",
     department: "Pharmacy Unit",
     role: "Pharmacy Staff",
-    username: "hadiza",
     status: "Active",
+    permissions: [
+      "View",
+      "Create",
+      "Edit",
+      "Print",
+      "Stock",
+      "SMS",
+      "Alerts",
+    ],
   },
   {
     id: 3,
     name: "Abba Yaro",
     staffId: "BZ003",
+    username: "abbayaro",
     department: "Ultrasound Room",
     role: "Ultrasound Staff",
-    username: "abbayaro",
     status: "Active",
-  },
-  {
-    id: 4,
-    name: "Kabiru Lawal",
-    staffId: "BZ004",
-    department: "Laboratory Unit",
-    role: "Laboratory Staff",
-    username: "kabiru",
-    status: "Active",
+    permissions: [
+      "View",
+      "Create",
+      "Edit",
+      "Print",
+      "Cashier",
+      "Reports",
+      "Stock",
+      "SMS",
+      "Alerts",
+    ],
   },
 ];
 
@@ -80,6 +105,7 @@ function App() {
   const [staff, setStaff] = useState(initialStaff);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [showPermission, setShowPermission] = useState(false);
   const [editing, setEditing] = useState(null);
   const [mobileMenu, setMobileMenu] = useState(false);
 
@@ -91,6 +117,8 @@ function App() {
     department: "",
     role: "",
   });
+
+  const [selectedPermissions, setSelectedPermissions] = useState([]);
 
   const menu = [
     ["Dashboard", "⌂"],
@@ -117,6 +145,7 @@ function App() {
 
   function openAddStaff() {
     setEditing(null);
+
     setForm({
       name: "",
       staffId: "",
@@ -125,11 +154,13 @@ function App() {
       department: "",
       role: "",
     });
+
     setShowForm(true);
   }
 
   function openEditStaff(person) {
     setEditing(person);
+
     setForm({
       name: person.name,
       staffId: person.staffId,
@@ -138,6 +169,7 @@ function App() {
       department: person.department,
       role: person.role,
     });
+
     setShowForm(true);
   }
 
@@ -181,6 +213,7 @@ function App() {
           department: form.department,
           role: form.role,
           status: "Active",
+          permissions: ["View"],
         },
       ]);
     }
@@ -194,11 +227,43 @@ function App() {
         person.id === id
           ? {
               ...person,
-              status: person.status === "Active" ? "Disabled" : "Active",
+              status:
+                person.status === "Active" ? "Disabled" : "Active",
             }
           : person
       )
     );
+  }
+
+  function openPermissions(person) {
+    setEditing(person);
+    setSelectedPermissions(person.permissions || []);
+    setShowPermission(true);
+  }
+
+  function togglePermission(permission) {
+    setSelectedPermissions((current) =>
+      current.includes(permission)
+        ? current.filter((item) => item !== permission)
+        : [...current, permission]
+    );
+  }
+
+  function savePermissions() {
+    if (!editing) return;
+
+    setStaff(
+      staff.map((person) =>
+        person.id === editing.id
+          ? {
+              ...person,
+              permissions: selectedPermissions,
+            }
+          : person
+      )
+    );
+
+    setShowPermission(false);
   }
 
   function resetPassword(person) {
@@ -219,7 +284,9 @@ function App() {
           color: #17221d;
         }
 
-        button, input, select {
+        button,
+        input,
+        select {
           font: inherit;
         }
 
@@ -360,10 +427,15 @@ function App() {
           padding: 28px;
         }
 
-        .welcome {
+        .welcome,
+        .card,
+        .table-card {
           background: white;
           border: 1px solid #e1e8e3;
-          border-radius: 18px;
+          border-radius: 15px;
+        }
+
+        .welcome {
           padding: 24px;
           margin-bottom: 22px;
         }
@@ -386,9 +458,6 @@ function App() {
         }
 
         .card {
-          background: white;
-          border: 1px solid #e1e8e3;
-          border-radius: 15px;
           padding: 18px;
         }
 
@@ -406,37 +475,6 @@ function App() {
           font-size: 25px;
           font-weight: bold;
           margin-top: 5px;
-        }
-
-        .grid {
-          display: grid;
-          grid-template-columns: 1.5fr 1fr;
-          gap: 20px;
-        }
-
-        .search {
-          width: 100%;
-          border: 1px solid #d8e1db;
-          border-radius: 10px;
-          padding: 12px;
-          outline: none;
-          margin-bottom: 12px;
-        }
-
-        .department {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 12px 0;
-          border-bottom: 1px solid #edf1ee;
-        }
-
-        .status {
-          font-size: 12px;
-          padding: 5px 9px;
-          border-radius: 20px;
-          background: #e8f4ec;
-          color: #27734c;
         }
 
         .page-head {
@@ -470,10 +508,15 @@ function App() {
           background: #244f3d;
         }
 
+        .search {
+          width: 100%;
+          border: 1px solid #d8e1db;
+          border-radius: 10px;
+          padding: 12px;
+          outline: none;
+        }
+
         .table-card {
-          background: white;
-          border: 1px solid #e1e8e3;
-          border-radius: 15px;
           overflow: hidden;
         }
 
@@ -489,10 +532,11 @@ function App() {
         table {
           width: 100%;
           border-collapse: collapse;
-          min-width: 850px;
+          min-width: 1000px;
         }
 
-        th, td {
+        th,
+        td {
           padding: 14px 16px;
           text-align: left;
           border-bottom: 1px solid #edf1ee;
@@ -528,11 +572,26 @@ function App() {
           padding: 7px 10px;
           border-radius: 7px;
           margin-right: 5px;
+          margin-bottom: 5px;
           font-size: 12px;
         }
 
         .action-btn:hover {
           background: #f1f5f2;
+        }
+
+        .permission-summary {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 5px;
+        }
+
+        .permission-tag {
+          background: #eef4f0;
+          color: #315f4b;
+          padding: 4px 7px;
+          border-radius: 6px;
+          font-size: 11px;
         }
 
         .form-overlay {
@@ -604,11 +663,40 @@ function App() {
           border-radius: 9px;
         }
 
+        .permission-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+          margin-top: 18px;
+        }
+
+        .permission-item {
+          border: 1px solid #dce5df;
+          border-radius: 10px;
+          padding: 13px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .permission-item input {
+          width: 18px;
+          height: 18px;
+        }
+
+        .security-note {
+          margin-top: 18px;
+          padding: 14px;
+          background: #eef4f0;
+          border-radius: 10px;
+          font-size: 13px;
+          color: #526159;
+        }
+
         .feature-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           gap: 15px;
-          margin-top: 20px;
         }
 
         .feature {
@@ -631,10 +719,6 @@ function App() {
         @media (max-width: 1000px) {
           .stats {
             grid-template-columns: repeat(2, 1fr);
-          }
-
-          .grid {
-            grid-template-columns: 1fr;
           }
 
           .feature-grid {
@@ -677,10 +761,8 @@ function App() {
             gap: 10px;
           }
 
-          .feature-grid {
-            grid-template-columns: 1fr;
-          }
-
+          .feature-grid,
+          .permission-grid,
           .form-grid {
             grid-template-columns: 1fr;
           }
@@ -741,7 +823,6 @@ function App() {
 
         <section className="content">
 
-          {/* DASHBOARD */}
           {active === "Dashboard" && (
             <>
               <div className="welcome">
@@ -771,53 +852,35 @@ function App() {
                 ))}
               </div>
 
-              <div className="grid">
-                <div className="card">
-                  <h3>Departments</h3>
-
-                  {departments.slice(0, 8).map((dept) => (
-                    <div className="department" key={dept}>
-                      <span>{dept}</span>
-                      <span className="status">Online</span>
-                    </div>
-                  ))}
+              <div className="feature-grid">
+                <div className="feature">
+                  👨‍⚕️
+                  <strong>Staff & Roles</strong>
+                  <span>Manage accounts and permissions.</span>
                 </div>
 
-                <div className="card">
-                  <h3>Recent System Activity</h3>
+                <div className="feature">
+                  🔐
+                  <strong>Security</strong>
+                  <span>Control access to hospital modules.</span>
+                </div>
 
-                  <div className="department">
-                    <span>🔐 Super Admin Login</span>
-                    <small>Now</small>
-                  </div>
-
-                  <div className="department">
-                    <span>👨‍⚕️ Staff Management</span>
-                    <small>Ready</small>
-                  </div>
-
-                  <div className="department">
-                    <span>🕐 Attendance</span>
-                    <small>Ready</small>
-                  </div>
-
-                  <div className="department">
-                    <span>📦 Stock Monitoring</span>
-                    <small>Ready</small>
-                  </div>
+                <div className="feature">
+                  📊
+                  <strong>Reports</strong>
+                  <span>Monitor hospital activities.</span>
                 </div>
               </div>
             </>
           )}
 
-          {/* STAFF & ROLES */}
           {active === "Staff & Roles" && (
             <>
               <div className="page-head">
                 <div>
                   <h1>Staff & Roles</h1>
                   <p>
-                    Manage hospital staff, departments, roles and accounts.
+                    Manage staff accounts, departments, roles and permissions.
                   </p>
                 </div>
 
@@ -844,270 +907,4 @@ function App() {
                 <div className="card">
                   <div className="stat-icon">⛔</div>
                   <div className="stat-title">Disabled</div>
-                  <div className="stat-value">
-                    {staff.filter((s) => s.status === "Disabled").length}
-                  </div>
-                </div>
-
-                <div className="card">
-                  <div className="stat-icon">🏢</div>
-                  <div className="stat-title">Departments</div>
-                  <div className="stat-value">{departments.length}</div>
-                </div>
-              </div>
-
-              <div className="table-card">
-                <div className="table-top">
-                  <input
-                    className="search"
-                    style={{ margin: 0 }}
-                    placeholder="Search staff name, Staff ID, department, role..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </div>
-
-                <div className="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Staff Name</th>
-                        <th>Staff ID</th>
-                        <th>Username</th>
-                        <th>Department</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {filteredStaff.map((person) => (
-                        <tr key={person.id}>
-                          <td>
-                            <strong>{person.name}</strong>
-                          </td>
-
-                          <td>{person.staffId}</td>
-
-                          <td>{person.username}</td>
-
-                          <td>{person.department}</td>
-
-                          <td>{person.role}</td>
-
-                          <td>
-                            <span
-                              className={
-                                person.status === "Active"
-                                  ? "badge-active"
-                                  : "badge-disabled"
-                              }
-                            >
-                              {person.status}
-                            </span>
-                          </td>
-
-                          <td>
-                            <button
-                              className="action-btn"
-                              onClick={() => openEditStaff(person)}
-                            >
-                              Edit
-                            </button>
-
-                            <button
-                              className="action-btn"
-                              onClick={() => toggleStatus(person.id)}
-                            >
-                              {person.status === "Active"
-                                ? "Disable"
-                                : "Activate"}
-                            </button>
-
-                            <button
-                              className="action-btn"
-                              onClick={() => resetPassword(person)}
-                            >
-                              Reset Password
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-
-                      {filteredStaff.length === 0 && (
-                        <tr>
-                          <td colSpan="7" style={{ textAlign: "center" }}>
-                            No staff found.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* OTHER MODULES */}
-          {active !== "Dashboard" && active !== "Staff & Roles" && (
-            <div className="card">
-              <h2>{active}</h2>
-              <p style={{ color: "#68736d" }}>
-                {active} module zai kasance mataki na gaba na construction.
-              </p>
-
-              <div className="feature-grid">
-                <div className="feature">
-                  🔐
-                  <strong>Super Admin Control</strong>
-                  <span>Full system administration.</span>
-                </div>
-
-                <div className="feature">
-                  📋
-                  <strong>Searchable Records</strong>
-                  <span>Search and monitor system information.</span>
-                </div>
-
-                <div className="feature">
-                  📊
-                  <strong>Reports</strong>
-                  <span>Searchable and printable reports.</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </section>
-      </main>
-
-      {/* ADD / EDIT STAFF MODAL */}
-      {showForm && (
-        <div className="form-overlay">
-          <div className="form-modal">
-            <h2>
-              {editing ? "Edit Staff Account" : "Create New Staff Account"}
-            </h2>
-
-            <form onSubmit={saveStaff}>
-              <div className="form-grid">
-
-                <div className="field full">
-                  <label>Staff Full Name *</label>
-                  <input
-                    value={form.name}
-                    onChange={(e) =>
-                      setForm({ ...form, name: e.target.value })
-                    }
-                    placeholder="Enter staff full name"
-                  />
-                </div>
-
-                <div className="field">
-                  <label>Staff ID *</label>
-                  <input
-                    value={form.staffId}
-                    onChange={(e) =>
-                      setForm({ ...form, staffId: e.target.value })
-                    }
-                    placeholder="e.g. BZ005"
-                  />
-                </div>
-
-                <div className="field">
-                  <label>Username *</label>
-                  <input
-                    value={form.username}
-                    onChange={(e) =>
-                      setForm({ ...form, username: e.target.value })
-                    }
-                    placeholder="Enter username"
-                  />
-                </div>
-
-                {!editing && (
-                  <div className="field full">
-                    <label>Initial Password *</label>
-                    <input
-                      type="password"
-                      value={form.password}
-                      onChange={(e) =>
-                        setForm({ ...form, password: e.target.value })
-                      }
-                      placeholder="Create temporary password"
-                    />
-                  </div>
-                )}
-
-                <div className="field">
-                  <label>Main Department *</label>
-                  <select
-                    value={form.department}
-                    onChange={(e) =>
-                      setForm({ ...form, department: e.target.value })
-                    }
-                  >
-                    <option value="">Select department</option>
-                    {departments.map((dept) => (
-                      <option key={dept} value={dept}>
-                        {dept}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="field">
-                  <label>Role *</label>
-                  <select
-                    value={form.role}
-                    onChange={(e) =>
-                      setForm({ ...form, role: e.target.value })
-                    }
-                  >
-                    <option value="">Select role</option>
-                    {roles.map((role) => (
-                      <option key={role} value={role}>
-                        {role}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-              </div>
-
-              <div
-                style={{
-                  marginTop: 18,
-                  padding: 14,
-                  background: "#eef4f0",
-                  borderRadius: 10,
-                  fontSize: 13,
-                  color: "#526159",
-                }}
-              >
-                🔐 <strong>Permission rule:</strong> Staff will only access
-                the department and functions assigned by Super Admin.
-              </div>
-
-              <div className="form-actions">
-                <button
-                  type="button"
-                  className="secondary"
-                  onClick={() => setShowForm(false)}
-                >
-                  Cancel
-                </button>
-
-                <button type="submit" className="primary">
-                  {editing ? "Save Changes" : "Create Staff"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-export default App;
+       
